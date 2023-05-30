@@ -188,9 +188,32 @@ class YahooFinanceQuoteSummary:
   # `YahooFinanceQuoteSummaryModule` enum values.
   def __init__(self, ticker_symbol, modules):
     self.ticker_symbol = ticker_symbol
+    self.website = None
+    self.country = None
+    self.city = None
+    self.address1 = None
+    self.industry = None
+    self.sector = None
+    self.longBusinessSummary = None
+    self.employees = None
+    self.officers: list = []
     self.modules = [self._MODULES[module] for module in modules]
     self.url = YahooFinanceQuoteSummary._construct_url(ticker_symbol, self.modules)
     self.module_data = {}
+    
+  def __parse_asset_profile(self):
+    data = self.module_data.get("assetProfile")
+    if not data:
+      return
+    self.website = data.get("website")
+    self.country = data.get("country")
+    self.city = data.get("city")
+    self.address1 = data.get("address1")
+    self.industry = data.get("industry")
+    self.sector = data.get("sector")
+    self.longBusinessSummary = data.get("longBusinessSummary")
+    self.employees = data.get("fullTimeEmployees")
+    self.officers = data.get("companyOfficers")
 
   def parse_modules(self, content):
     """Parses all the of the module responses from the json into a top-level dictionary."""
@@ -204,6 +227,7 @@ class YahooFinanceQuoteSummary:
         if module in result:
           self.module_data[module] = result[module]
           break
+    self.__parse_asset_profile()
     return True
 
   def get_balance_sheet_history(self, key):

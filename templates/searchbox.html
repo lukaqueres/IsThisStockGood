@@ -1,35 +1,60 @@
-<div class="container pt-4" "id="searchbox">
-  <form id="searchboxform" action="/search" method="post">
-    <div class="form-group row justify-content-center">
-      <div class="col-md-3 nopadding">
-        <input
-            type="text"
-            class="form-control"
-            id="ticker"
-            placeholder="Ticker Symbol"
-            maxlength=5
-            onkeydown="return validateInput(event)"/>
-      </div>
-      <div class="col-md-1 nopadding">
-        <input
-            type="submit"
-            value="Analyze"
-            class="btn btn-raised btn-md btn-warning"
-        >
-      </div>
-    </div>
+<header>
+  <form id="searchbox" name="searchbox" action="/search" method="post">
+    <input
+        type="text"
+        is="input-search"
+        id="ticker"
+        placeholder="Ticker Symbol"
+        title="Insert ticker Symbol"
+        maxlength=5/>
+    <button
+        type="submit"
+        title="Analyze"><ion-icon name="arrow-forward-outline"></ion-icon></button>
   </form>
-</div>
-
+</header>
+<div class="header-placeholder"></div>
 <script>
-document.querySelector("#ticker").addEventListener("keypress", (event) => {
+/*document.querySelector("#ticker").addEventListener("keypress", (event) => {
   let key = event.key;
   if (!key.match(/[A-Za-z,.\-]/)) {
       event.preventDefault();
     }
-});
+});*/
+</script>
+<style>
+  {% include "css/styles.css" %}
+</style>
+<script>
+  {% include "js/search.js" %}
 </script>
 
 <script>
-  {% include "js/search.js" %}
+    class SearchInput extends HTMLInputElement {
+        constructor(...args) {
+            super(...args);
+
+            this.addEventListener("focusin", this.focusin );
+            this.addEventListener("focusout", this.focusout );
+            this.addEventListener("keydown", (event) => { this.keydown(event); });
+        }
+
+        focusin(event) {
+
+        }
+
+        focusout(event) {
+
+        }
+
+        keydown(event) {
+            let key = event.key;
+            if (!key.match(/[A-Za-z,.\-]/)) {
+                event.preventDefault();
+            }
+        }
+
+    }
+
+    customElements.define("input-search", SearchInput, { extends: 'input', });
+
 </script>

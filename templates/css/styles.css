@@ -1,0 +1,206 @@
+:root {
+    --color-accent: #009688;
+    --color-accent-secondary: #00ffe7;
+    --color-primary: #fafafa;
+    --color-primary-secondary: #d5d5d5;
+
+    --font-color: black;
+    --font-color-secondary: #616161;
+
+    --color-link: #1967d2;
+}
+
+* {
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #30125e;
+    background-image: url("static/images/mountains.jpg");
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+header {
+    z-index: 98;
+    /*position: fixed;*/
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    max-width: 900px;
+    width: 100vw;
+    background-color: white;
+}
+
+.header-placeholder {
+    height: 5rem;
+}
+
+.link {
+    color: white !important;
+    transition: all 0.2s;
+    text-decoration: underline;
+}
+
+    .link:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+popup-info {
+    height: 1rem;
+    width: 1rem;
+    align-self: baseline;
+    margin-inline: 0.5rem;
+}
+
+button, ion-icon.button {
+    transition: all 0.2s;
+}
+
+button:hover, ion-icon.button:hover {
+    cursor: pointer;
+    color: var(--color-accent) !important;
+}
+
+#searchbox {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    padding-inline: 0.5rem;
+    height: 3rem;
+    width: 20rem;
+    border: 2px solid #486edb;
+    border-radius: 1rem;
+    color: #486edb;
+}
+
+    #searchbox #ticker {
+        background-color: transparent;
+        border: none;
+        color: inherit;
+        flex: 1;
+    }
+
+        #searchbox #ticker:focus-visible {
+            outline: none;
+        }
+
+    #searchbox button[type="submit"] {
+        border: none;
+        background-color: transparent;
+        color: inherit;
+        transition: all 0.2s;
+    }
+
+    #searchbox ion-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    #searchbox button[type="submit"]:hover {
+        color: var(--color-accent);
+    }
+
+
+.expandable {
+    color: #30125e;
+    display: inline-block;
+    padding: 0.5rem 1rem 1rem;
+    background-color: #6a91ff;
+    background: linear-gradient( 90deg, #6a91ff, #a380ff );
+    border-radius: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+    .expandable #name {
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.1rem;
+}
+
+    .expandable > .content {
+        box-sizing: content-box;
+        padding-inline: 1rem;
+        display: flex;
+        height: 0;
+        overflow-y: hidden;
+        transition: all 0.2s cubic-bezier(.65,.05,.36,1);
+    }
+
+        .expandable > .content.show {
+            height: auto;
+        }
+
+        .expandable > .content > div. {
+            display: inline;
+        }
+
+    .expandable > .head {
+        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+        .expandable > .head > .title {
+            color: var(--font-color-secondary);
+            text-transform: uppercase;
+        }
+
+        .expandable > .head > ion-icon {
+            margin-left: auto;
+            color: var(--font-color-secondary);
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+#company-details {
+    width: 20rem;
+}
+
+    #company-details li {
+        color: var(--font-color-secondary);
+        text-transform: capitalize;
+        margin-block: 0.5rem;
+        display: flex;
+    }
+
+    #company-details > ul > li > * {
+        margin-left: auto;
+        /*width: 70%;*/
+        color: var(--font-color);
+        text-transform: none;
+        text-align: right;
+    }
+
+#longBusinessSummary {
+    flex: 1;
+    font-size: smaller;
+    text-align: justify;
+}
+
+ul.clear {
+    list-style: none;
+}
+
+.tags-container {
+    display: flex;
+}
+
+.tag {
+    padding: 0.2rem 1rem;
+    font-size: smaller;
+    border-radius: 0.5rem;
+    margin-inline: 0.25rem;
+    border: 1px solid white;
+    color: white;
+}

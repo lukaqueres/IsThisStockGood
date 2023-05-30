@@ -1,8 +1,9 @@
 {% extends "base.html" %}
     {% include "loading.html" %}
+    {% include "notifications.html" %}
 	{% block bodycontent %}
 		{% include "searchbox.html" %}
-    {% include "meaning.html" %}
+    {% include "about.html" %}
     {% include "moat.html" %}
     {% include "management.html" %}
     {% include "margin_of_safety.html" %}
@@ -13,5 +14,6 @@
       $(document).ready(function(){
         $('[data-toggle="popover"]').popover({ trigger: "hover" });
       });
+
     </script>
 	{% endblock %}

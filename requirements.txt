@@ -2,3 +2,6 @@ Flask==2.3.2
 lxml==4.9.1
 #numpy==1.6.1
 requests-futures==1.0.0
+requests~=2.27.1
+imgkit~=1.2.3
+Pillow~=9.5.0

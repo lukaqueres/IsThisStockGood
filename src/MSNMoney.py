@@ -7,6 +7,7 @@ class MSNMoney:
 
   def __init__(self, ticker_symbol):
     self.ticker_symbol = ticker_symbol.replace('.', '')
+    self.displayName = None
     self.pe_high = None
     self.pe_low = None
 
@@ -27,6 +28,7 @@ class MSNMoney:
     return self._parse_pe_ratios(json.loads(content))
 
   def _parse_pe_ratios(self, data):
+    self.displayName = data["displayName"]
     recent_pe_ratios = [
       year.get('priceToEarningsRatio', None)
       for year in data.get('companyMetrics', [])

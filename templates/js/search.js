@@ -23,7 +23,7 @@ class Color {
 
 // Attach a submit handler to the form.
 $(document).ready(function() {
-  $("#searchboxform").submit(function(event) {
+  $("#searchbox").submit(function(event) {
 
     const loader = document.querySelector("popup-loading");
 
@@ -37,11 +37,17 @@ $(document).ready(function() {
     // Extract the ticker symbol.
     let $ticker = $('#ticker').val();
     if ($ticker.length == 0) {
+      const notifications = document.querySelector("notifications-container");
+      notifications.add("Invalid ticker", "Ticker can not be empty", null, "ticket-outline", "large", null, "warning")
       return;
     }
 
     // Start loading
     loader.show();
+    const url = new URL(window.location.href);
+
+    url.searchParams.set('ticker', $ticker.toUpperCase() );
+    history.pushState({}, null,  url.toString());
 
     // Post the data to the path.
     let posting = $.post(path, { ticker: $ticker } );
@@ -57,7 +63,8 @@ $(document).ready(function() {
         return;
     })
     // Update the HTML with the results.
-    posting.done(function(json_data) {
+    posting.done(function(json_data, statusText, xhr) {
+      // console.log(`${xhr.status} : ${statusText}`);
       data = JSON.parse(json_data);
       if (data['error']) {
         $.snackbar({
@@ -65,6 +72,8 @@ $(document).ready(function() {
           style: 'toast',
           timeout: 3500
         });
+        const notifications = document.querySelector("notifications-container");
+        notifications.add("Invalid ticker", data['error'], null, "ticket-outline", "large", null, "warning")
         // Hide loading
         loader.hide();
         return;
@@ -75,6 +84,19 @@ $(document).ready(function() {
         let baseWebsiteTitle = document.title.split('?')[0] + '?';
         document.title = baseWebsiteTitle + ' - ' + data.ticker.toUpperCase();
       }
+
+      // Update about.
+      updateAboutCompany(data, "name");
+      updateAboutCompany(data, "longBusinessSummary");
+      //updateAboutCompany(data, "website");
+      document.querySelector("#website").value(data["website"]);
+      updateAboutCompany(data, "industry");
+      updateAboutCompany(data, "sector");
+      updateAddress(data);
+      /*updateAboutCompany(data, "country");
+      updateAboutCompany(data, "city");
+      updateAboutCompany(data, "address1");*/
+      updateAboutCompany(data, "employees");
 
       // Update moat numbers.
       updateBigFiveHtmlWithDataForKey(data, 'eps');
@@ -129,8 +151,37 @@ $(document).ready(function() {
       // Hide loading
       loader.hide();
     });
+
   });
+
+  //get ticker from url
+  const url = new URL(window.location.href);
+  if ( url.searchParams.get("ticker") ) {
+    document.querySelector("#ticker").value = url.searchParams.get("ticker");
+    document.querySelector("#searchbox").requestSubmit();
+  }
+
 });
+
+window.onpopstate = function(e){
+  if(e.state){
+    //get ticker from url
+    const url = new URL(window.location.href);
+    if ( url.searchParams.get("ticker") ) {
+      document.querySelector("#ticker").value = url.searchParams.get("ticker");
+      document.querySelector("#searchbox").requestSubmit();
+    }
+  }
+};
+
+function updateAddress(data) {
+    document.querySelector(`#address`).value(`${data["country"]} ${data["city"]} - ${data["address1"]}`);
+}
+
+function updateAboutCompany(data, key) {
+    const element = document.querySelector(`#${key}`);
+    element.innerHTML = data[key];
+}
 
 function updateHtmlWithValueForKey(data, key, commas) {
   value = data[key];

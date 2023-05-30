@@ -1,4 +1,5 @@
 import random
+import json
 import logging
 import src.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
@@ -57,14 +58,25 @@ def fetchDataForTickerSymbol(ticker):
   key_stats = data_fetcher.stockrow_key_stats
   if not key_stats:
     return None
+  yahoo_finance_quote_summary = data_fetcher.yahoo_finance_quote_summary
   pe_ratios = data_fetcher.pe_ratios
   yahoo_finance_analysis = data_fetcher.yahoo_finance_analysis
   yahoo_finance_quote = data_fetcher.yahoo_finance_quote
   margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(key_stats, pe_ratios, yahoo_finance_quote, yahoo_finance_analysis)
   payback_time = _calculatePaybackTime(key_stats, yahoo_finance_quote, yahoo_finance_analysis)
+  # print(yahoo_finance_quote_summary.__dict__)
   template_values = {
     'ticker' : ticker,
-    'name' : yahoo_finance_quote.name if yahoo_finance_quote and yahoo_finance_quote.name else 'null',
+    'name' : pe_ratios.displayName if pe_ratios and pe_ratios.displayName else 'null',
+    'industry': yahoo_finance_quote_summary.industry if yahoo_finance_quote_summary and yahoo_finance_quote_summary.industry else 'null',
+    'website': yahoo_finance_quote_summary.website if yahoo_finance_quote_summary and yahoo_finance_quote_summary.website else 'null',
+    'country': yahoo_finance_quote_summary.country if yahoo_finance_quote_summary and yahoo_finance_quote_summary.country else 'null',
+    'city': yahoo_finance_quote_summary.city if yahoo_finance_quote_summary and yahoo_finance_quote_summary.city else 'null',
+    'address1': yahoo_finance_quote_summary.address1 if yahoo_finance_quote_summary and yahoo_finance_quote_summary.address1 else 'null',
+    'sector': yahoo_finance_quote_summary.sector if yahoo_finance_quote_summary and yahoo_finance_quote_summary.sector else 'null',
+    'longBusinessSummary': yahoo_finance_quote_summary.longBusinessSummary if yahoo_finance_quote_summary and yahoo_finance_quote_summary.longBusinessSummary else 'null',
+    'employees': yahoo_finance_quote_summary.employees if yahoo_finance_quote_summary and yahoo_finance_quote_summary.employees else 'null',
+    'officers': json.dumps(yahoo_finance_quote_summary.officers) if yahoo_finance_quote_summary and yahoo_finance_quote_summary.officers else 'null',
     'roic': data_fetcher.get_roic_averages(),
     'eps': key_stats.eps_growth_rates if key_stats.eps_growth_rates else [],
     'sales': key_stats.revenue_growth_rates if key_stats.revenue_growth_rates else [],
@@ -164,6 +176,8 @@ class DataFetcher():
     if not self.stockrow_key_stats:
       self.lock.release()
       return
+    # print(json.dumps(json.loads(response.content), indent=4, sort_keys=True))
+    # print(result)
     success = self.stockrow_key_stats.parse_json_data(response.content)
     if not success:
       self.stockrow_key_stats = None
@@ -197,11 +211,15 @@ class DataFetcher():
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_pe_ratios` and `continue_fetching_pe_ratios`.
   def parse_pe_ratios(self, response, *args, **kwargs):
+    logger.debug(f"Request to {response.url} returned : {response.__dict__}")
     if response.status_code != 200:
+      logger.warning(f"Request to {response.url} returned with code {response.status_code} because of {response.reason}")
       return
+    logger.debug(f"Request to {response.url}  returned with code {response.status_code}")
     if not self.pe_ratios:
       return
     result = response.text
+    # print(json.dumps(json.loads(response.text), indent=4, sort_keys=True))
     success = self.pe_ratios.parse_pe_ratios(result)
     if not success:
       self.pe_ratios = None
@@ -217,8 +235,11 @@ class DataFetcher():
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_yahoo_finance_analysis`.
   def parse_yahoo_finance_analysis(self, response, *args, **kwargs):
+    logger.debug(f"Request to {response.url} returned : {response.__dict__}")
     if response.status_code != 200:
+      logger.warning(f"Request to {response.url} returned with code {response.status_code} because of {response.reason}")
       return
+    logger.debug(f"Request to {response.url}  returned with code {response.status_code}")
     if not self.yahoo_finance_analysis:
       return
     result = response.text
@@ -237,11 +258,11 @@ class DataFetcher():
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_yahoo_finance_quote`.
   def parse_yahoo_finance_quote(self, response, *args, **kwargs):
-    logger.debug(f"Request returned : {response.__dict__}")
+    logger.debug(f"Request to {response.url} returned : {response.__dict__}")
     if response.status_code != 200:
-      logger.warning(f"Request returned with code {response.status_code} because of {response.reason}")
+      logger.warning(f"Request to {response.url} returned with code {response.status_code} because of {response.reason}")
       return
-    logger.debug(f"Request returned with code {response.status_code}")
+    logger.debug(f"Request to {response.url}  returned with code {response.status_code}")
     if not self.yahoo_finance_quote:
       return
     result = response.text
@@ -251,9 +272,42 @@ class DataFetcher():
 
   def fetch_yahoo_finance_quote_summary(self):
     modules = [
-        YahooFinanceQuoteSummaryModule.incomeStatementHistory,
-        YahooFinanceQuoteSummaryModule.balanceSheetHistory
+      YahooFinanceQuoteSummaryModule.incomeStatementHistory,
+      YahooFinanceQuoteSummaryModule.balanceSheetHistory,
+      YahooFinanceQuoteSummaryModule.assetProfile,
+      YahooFinanceQuoteSummaryModule.financialData,
+      YahooFinanceQuoteSummaryModule.balanceSheetHistory,
+      YahooFinanceQuoteSummaryModule.earnings
     ]
+    """
+    modules = [
+      YahooFinanceQuoteSummaryModule.assetProfile,
+      YahooFinanceQuoteSummaryModule.incomeStatementHistory,
+      YahooFinanceQuoteSummaryModule.incomeStatementHistoryQuarterly,
+      YahooFinanceQuoteSummaryModule.balanceSheetHistory,
+      YahooFinanceQuoteSummaryModule.balanceSheetHistoryQuarterly,
+      YahooFinanceQuoteSummaryModule.cashFlowStatementHistory,
+      YahooFinanceQuoteSummaryModule.cashFlowStatementHistoryQuarterly,
+      YahooFinanceQuoteSummaryModule.defaultKeyStatistics,
+      YahooFinanceQuoteSummaryModule.financialData,
+      YahooFinanceQuoteSummaryModule.calendarEvents,
+      YahooFinanceQuoteSummaryModule.secFilings,
+      YahooFinanceQuoteSummaryModule.recommendationTrend,
+      YahooFinanceQuoteSummaryModule.upgradeDowngradeHistory,
+      YahooFinanceQuoteSummaryModule.institutionOwnership,
+      YahooFinanceQuoteSummaryModule.fundOwnership,
+      YahooFinanceQuoteSummaryModule.majorDirectHolders,
+      YahooFinanceQuoteSummaryModule.majorHoldersBreakdown,
+      YahooFinanceQuoteSummaryModule.insiderTransactions,
+      YahooFinanceQuoteSummaryModule.insiderHolders,
+      YahooFinanceQuoteSummaryModule.netSharePurchaseActivity,
+      YahooFinanceQuoteSummaryModule.earnings,
+      YahooFinanceQuoteSummaryModule.earningsHistory,
+      YahooFinanceQuoteSummaryModule.earningsTrend,
+      YahooFinanceQuoteSummaryModule.industryTrend,
+      YahooFinanceQuoteSummaryModule.indexTrend,
+      YahooFinanceQuoteSummaryModule.sectorTrend,
+    ]"""
     self.yahoo_finance_quote_summary = YahooFinanceQuoteSummary(self.ticker_symbol, modules)
     session = self._create_session()
     rpc = session.get(self.yahoo_finance_quote_summary.url, allow_redirects=True, hooks={
@@ -264,11 +318,16 @@ class DataFetcher():
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_yahoo_finance_quote_summary`.
   def parse_yahoo_finance_quote_summary(self, response, *args, **kwargs):
+    logger.debug(f"Request to {response.url} returned : {response.__dict__}")
     if response.status_code != 200:
+      logger.warning(
+        f"Request to {response.url} returned with code {response.status_code} because of {response.reason}")
       return
+    logger.debug(f"Request to {response.url}  returned with code {response.status_code}")
     if not self.yahoo_finance_quote_summary:
       return
     result = response.text
+    print(json.dumps(json.loads(response.text), indent=4, sort_keys=True))
     success = self.yahoo_finance_quote_summary.parse_modules(result)
     if not success:
       self.yahoo_finance_quote_summary = None

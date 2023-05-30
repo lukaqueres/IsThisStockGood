@@ -1,6 +1,10 @@
 import logging
+import imgkit
+import base64
+import io
+from PIL import Image
 from datetime import date
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, Response
 from src.DataFetcher import fetchDataForTickerSymbol
 
 logger = logging.getLogger("IsThisStockGood")
@@ -14,6 +18,25 @@ handler.setFormatter(h_format)
 logger.addHandler(handler)
 
 app = Flask(__name__)
+
+
+@app.route('/description')
+def description():
+  return "Example Description"
+
+
+@app.route('/title')
+def title():
+  return "IsThisStockGood | Example Name"
+
+
+@app.route('/preview.jpg')
+def preview():
+  imgkit.from_string('Hello!', 'tmp/preview.jpg')
+  with open("picture.png", "rb") as file:
+    preview = base64.b64encode(file.read())
+  preview = Image.open(io.BytesIO(preview))
+  return Response('preview.jpg', mimetype='image/png')
 
 
 @app.route('/')
@@ -36,9 +59,10 @@ def search():
   ticker = request.values.get('ticker')
   template_values = fetchDataForTickerSymbol(ticker)
   if not template_values:
-    return render_template('json/error.json', **{'error' : 'Invalid ticker symbol'})
+    return render_template('json/error.json', **{'error': 'Invalid ticker symbol'}), 404, "Resources not found"
   return render_template('json/stock_data.json', **template_values)
 
 
 if __name__ == '__main__':
-  app.run(host='127.0.0.1', port=8080, debug=True)
+  app.run(host='143.42.16.225', port=8080, debug=True)
+  # app.run(host='127.0.0.1', port=8080, debug=True)
