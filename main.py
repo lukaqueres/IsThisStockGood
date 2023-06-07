@@ -52,7 +52,7 @@ def company_page(ticker: str = None):
 	@param ticker: Symbol
 	@return: Page with loading data
 	"""
-	return render_template('ticker.html', ticker=ticker.upper())
+	return render_template('home.html', ticker=ticker.upper())
 
 
 @app.route("/")
