@@ -6,9 +6,11 @@ automatic_scaling:
 
 handlers:
 - url: /css
-  static_dir: css
+  static_dir: assets/css
 - url: /img
-  static_dir: img
+  static_dir: assets/img
+- url: /js
+  static_dir: assets/js
   # This handler routes all requests not caught above to your main app. It is
   # required when static routes are defined, but can be omitted (along with
   # the entire handlers section) when there are no static files defined.

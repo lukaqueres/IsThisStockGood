@@ -1,0 +1,23 @@
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="../img/favicon.ico" type="image/x-icon" />
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta name="description" content="A tool for evaluating companies using the Rule #1 investing principles.">
+    <meta property="og:type" content="website">
+    {% if ticker +%}
+    <title>IsThisStockGood | {{ ticker }}</title>
+    <meta name="title" content="IsThisStockGood | {{ ticker }}">
+    <meta property="og:url" content="https://127.0.0.1/{{ ticker }}"> {# TODO: Add url #}
+    <meta property="og:title" content="IsThisStockGood | {{ ticker }}">
+    <meta property="og:description" content="A tool for evaluating companies using the Rule #1 investing principles. ">
+    <meta property="og:image" content="/{{ ticker }}/preview.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://127.0.0.1/{{ ticker }}"> {# TODO: Add url hir too #}
+    <meta property="twitter:title" content="IsThisStockGood | {{ ticker }}">
+    <meta property="twitter:description" content="A tool for evaluating companies using the Rule #1 investing principles. ">
+    <meta property="twitter:image" content="/{{ ticker }}/preview.jpg">
+    {% else %}
+    <title>IsThisStockGood</title>
+    <meta name="title" content="IsThisStockGood">
+    {% endif %}
+</head>
