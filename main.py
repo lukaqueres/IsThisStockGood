@@ -37,7 +37,7 @@ def symbol_preview(ticker: str = None):
 	
 	data, code = source.ticker(ticker)
 	if data["error"]:
-		img = preview.error(code, data["error"])
+		img = preview.error(ticker, code, data["error"])
 	else:
 		img = preview.ticker(ticker, data)
 	

@@ -2,6 +2,8 @@
 Create preview images by tickers with PIL(low) library
 """
 import io
+from typing import Optional
+
 from PIL import Image, ImageFont, ImageDraw
 
 
@@ -30,6 +32,14 @@ content_font_light = ImageFont.truetype("assets/fonts/Roboto-Light.ttf", 30)
 
 
 def ticker(symbol: str, data: dict) -> io.BytesIO:
+	"""
+	Generate preview image about company
+	
+	@param symbol: Ticker symbol
+	@param data: Fetched data
+	
+	@return: Preview jpeg image
+	"""
 	color = "#2f363d"
 	
 	image = Image.new("RGB", (width, height), "white")
@@ -78,19 +88,42 @@ def ticker(symbol: str, data: dict) -> io.BytesIO:
 	return img_io
 
 
-def error(code: int, description: str) -> io.BytesIO:
+def error(symbol: str, code: int, message: str, description: Optional[str] = None) -> io.BytesIO:
+	"""
+	Prepare preview with error information, f.ex 404, about not found symbol
+
+	@param symbol: Symbol
+	@param code: Error code of response
+	@param message: Error message of response
+	@param description: Standard or custom description
 	
-	font_bold = ImageFont.truetype("assets/fonts/Roboto-Bold.ttf", 100)
-	font_light = ImageFont.truetype("assets/fonts/Roboto-Light.ttf", 100)
+	@return: Error preview image in jpeg
+	"""
+	if not description:
+		description = "We had some trouble acquiring data for this symbol. \n"\
+		              "If it was not found, our sources may not have records about it."
 	
 	color = "#701516"
 	image = Image.new("RGB", (width, height), "white")
 	draw = ImageDraw.Draw(image)
 	
-	code_length = draw.textlength(f"{code} / ", font=large_font_light)
+	ticker_length = draw.textlength(f"{symbol} / ", font=large_font_light)
+	message_length = draw.textlength(message, font=large_font_bold)
 	
-	draw.text((125 + code_length, height / 2), f"{code} / ", fill=color, anchor="rs", font=font_light)
-	draw.text((125 + code_length, height / 2), description, fill="#2f363d", anchor="ls", font=font_bold)
+	draw.text((125 + ticker_length, 175), f"{symbol} / ", fill="#2f363d", anchor="rs", font=large_font_light)
+	
+	if ticker_length + message_length + 250 <= width:
+		draw.text((125 + ticker_length, 175), f"Error {code}", fill=color, anchor="ls",
+		          font=large_font_bold)
+		draw.text((125 + ticker_length, 225), message, fill=color, anchor="ls",
+		          font=content_font_light)
+	else:
+		draw.text((125, 255), f"Error {code}", fill=color, anchor="ls",
+		          font=large_font_bold)
+		draw.text((125, 300), message, fill=color, anchor="ls", font=content_font_light)
+	
+	draw.multiline_text((125, 410), description, fill="#2f363d", anchor="ls",
+	                    font=content_font_light, align="left", spacing=10)
 	
 	draw.line(((0, height), (width, height)), fill=color, width=50)
 	
