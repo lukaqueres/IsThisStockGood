@@ -119,7 +119,7 @@ class MSNMoney(src.Source):
 		except Exception as e:
 			logger.error(e)
 			logging.error(traceback.format_exc())
-			self.error = (422, "Data could not be processed")
+			self.error = (424, "Data could not be processed")
 		return self
 		
 	async def __stock_id(self) -> Optional[str]:
@@ -142,7 +142,7 @@ class MSNMoney(src.Source):
 		except Exception as e:
 			logger.error(e)
 			logger.debug(content)
-			self.error = (422, "Data could not be processed")
+			self.error = (424, "Data could not be processed")
 			return None
 		
 	def __pe_ratios(self) -> Tuple[Optional[int], Optional[int]]:

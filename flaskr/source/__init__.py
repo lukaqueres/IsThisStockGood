@@ -6,6 +6,7 @@ Get data from every source with one call
 import logging
 import asyncio
 import json
+import re
 from typing import Optional
 
 from flaskr.source.sources import *
@@ -108,6 +109,20 @@ def ticker(symbol: str) -> (dict, int):
 	return json.loads(result.to_json()), code
 
 
+def check(symbol: str) -> bool:
+	"""
+	Check if symbol is correct
+	
+	@param symbol: Symbol
+	@return: If symbol is correct
+	"""
+	pattern = re.compile(r"[A-Za-z,.\-]+")
+	
+	if len(symbol) > 6 or not pattern.match(symbol):
+		return False
+	return True
+
+
 def _calculate_margin_of_safety_price(equity_growth_rates: list, pe_low: int, pe_high: int, ttm_eps: int,
                                       five_year_growth_rate: int) -> (Optional[int], Optional[int]):
 	"""
@@ -156,14 +171,21 @@ def _get_roic_averages(one_year_avg: int, three_year_avg: int, roic_avg: list) -
 		return None
 	f_roic_avg = []
 	try:
-		f_roic_avg.append(one_year_avg)
+		if one_year_avg is not None:
+			f_roic_avg.append(one_year_avg)
+		else:
+			raise AttributeError
 	except AttributeError:
 		try:
 			f_roic_avg.append(roic_avg[0])
 		except IndexError:
 			return []
+		
 	try:
-		f_roic_avg.append(three_year_avg)
+		if three_year_avg is not None:
+			f_roic_avg.append(three_year_avg)
+		else:
+			raise AttributeError
 	except AttributeError:
 		try:
 			f_roic_avg.append(roic_avg[1])

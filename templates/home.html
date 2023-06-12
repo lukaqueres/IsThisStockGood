@@ -1,1 +1,24 @@
 {% extends "base.html" %}
+
+{% block body %}
+{% include "header.html" %}
+
+{% include "notifications.html" %}
+<div id="container">
+    {% include "about.html" %}
+    {% include "moat.html" %}
+    {% include "management.html" %}
+    {% include "margin.html" %}
+    {% include "payback.html" %}
+    {% include "market.html" %}
+</div>
+
+{% endblock body %}
+
+{% block footer %}
+    {{ super() }}
+<script>
+    {{ 'load(\"{}\");'.format(ticker) | safe if ticker }}
+</script>
+
+{% endblock footer %}

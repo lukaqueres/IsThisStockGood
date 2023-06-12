@@ -73,7 +73,7 @@ def ticker(symbol: str, data: dict) -> io.BytesIO:
 	draw.text((575, 450), ceo or "No data", fill=color, anchor="ls",
 	          font=content_font_light)
 	
-	colors = [value for value in _values(data, "color")]
+	colors = [value if value else "white" for value in _values(data, "color")]
 	
 	line_length = width / len(colors)
 	line_pos = 0

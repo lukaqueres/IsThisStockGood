@@ -1,0 +1,25 @@
+<header>
+    <div id="header-placeholder" style="width: 4.75rem; margin-inline: 1rem;">
+    </div>
+    <form id="searchbox" is="search-form" name="searchbox" action="/search/{}" method="post">
+        <input
+            type="text"
+            value="{{ ticker if ticker }}"
+            name="symbol-input"
+            id="symbol-input"
+            placeholder="Ticker Symbol"
+            title="Insert ticker Symbol"
+            aria-label="Insert ticker Symbol"
+            maxlength=6/>
+        <button
+            id="sumbit-ticker"
+            type="submit"
+            class="ionic"
+            aria-label="Submit ticker"
+            title="Analyze"><ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon></button>
+    </form>
+    <div id="header-controls">
+        <button id="scheme-cycler" aria-label="Change color scheme" title="Change color scheme" class="ionic"><ion-icon name="moon-outline" aria-hiden="true"></ion-icon></button>
+        <button id="notifications-shower" aria-label="Show notifications" title="Show notifications" class="ionic"><ion-icon name="notifications-outline" aria-hidden="true"></ion-icon></button>
+    </div>
+</header>

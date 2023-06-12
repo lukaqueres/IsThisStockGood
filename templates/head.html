@@ -1,6 +1,8 @@
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="../img/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width" />
+    
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta name="description" content="A tool for evaluating companies using the Rule #1 investing principles.">
     <meta property="og:type" content="website">
@@ -20,4 +22,6 @@
     <title>IsThisStockGood</title>
     <meta name="title" content="IsThisStockGood">
     {% endif %}
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>

@@ -1,0 +1,226 @@
+@media (prefers-color-scheme: light) {
+	:root {
+		--accent-color: #486edb;
+		--font-color: black;
+		--background-color: white;
+		--background-secondary-color: #2e2c37;
+		color-scheme: light;
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--accent-color: #486edb;
+		--font-color: white;
+		--background-color: #1c1b22;
+		--background-secondary-color: #2e2c37;
+		color-scheme: dark;
+	}
+}
+
+:root.dark {
+	--accent-color: #486edb;
+	--font-color: white;
+	--background-color: #1c1b22;
+	--background-secondary-color: #2e2c37;
+	color-scheme: dark;
+}
+
+:root.light {
+	--accent-color: #486edb;
+	--font-color: black;
+	--background-color: white;
+	--background-secondary-color: #2e2c37;
+	color-scheme: light;
+}
+
+* {
+	margin: 0;
+	box-sizing: border-box;
+	font-family: "Roboto";
+	transition: color 0.2s, background-color 0.2s;
+}
+
+html, body {
+	width: 100%;
+	color: var(--font-color);
+	background-color: var(--background-color);
+}
+
+header {
+	width: 100%;
+	padding: 1rem 0.5rem;
+	height: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+:is(button, a, input[type="submit"]) {
+	transition: all 0.2s;
+}
+
+	:is(button, a, input[type="submit"]):hover {
+		cursor: pointer;
+	}
+
+
+.ionic {
+	background-color: transparent;
+	border: none;
+	color: inherit;
+	padding: 0;
+}
+
+.ionic > ion-icon {
+	height: inherit;
+	width: inherit;
+	color: inherit;
+}
+
+.flex {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	flex-wrap: wrap;
+}
+
+	.flex > * {
+		margin-inline: 0.5rem;
+	}
+
+#container {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(30rem, 1fr));
+	gap: 1rem;
+	grid-auto-rows: minmax(10rem, auto);
+	padding: 1rem;
+}
+
+#searchbox {
+	color: var(--accent-color);
+	background-color: var(--background-color);
+	border: 2px solid;
+	border-radius: 1rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	transition: 0.2s;
+	padding-inline: 0.5rem;
+	height: 3rem;
+	width: 20rem;
+}
+
+	#searchbox:focus-within {
+		background-color: var(--accent-color);
+		color: var(--background-color);
+		border-color: var(--accent-color);
+	}
+
+	#searchbox > input[type="text"] {
+		background-color: transparent;
+		color: inherit;
+		border: none;
+		flex: 1;
+		height: 100%;
+	}
+
+		#searchbox > input[type="text"]:focus {
+			outline: none;
+		}
+
+	#searchbox > * {
+		font-size: large;
+		margin-inline: 0.5rem;
+	}
+
+	#searchbox > button {
+		width: 1.5rem;
+		height: 1.5rem;
+	}
+
+#header-controls {
+	width: 4.75rem;
+	height: 1.5rem;
+	display: flex;
+	align-items: center;
+	color: var(--accent-color);
+	margin: 1rem;
+}
+
+	#header-controls > button {
+		width: 1.5rem;
+		height: 1.5rem;
+		margin-inline: 0.5rem;
+	}
+
+#notification-container {
+	position: fixed;
+	top: 5rem;
+	right: 0;
+	max-width: 20rem;
+	width: 100vw;
+}
+
+	#notification-container > #clear-notifications {
+		display: none;
+	}
+
+		#notification-container > popup-notification ~ #clear-notifications {
+			display: inline-block;
+		}
+
+.section {
+	border-radius: 0.5rem;
+	border: 1px solid var(--background-secondary-color);
+	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#moat.section {
+	/*
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1rem;
+	grid-auto-rows: minmax(10rem, auto);
+	*/
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.load {
+	-webkit-animation: loading-spin 3s linear infinite; /* Safari */
+	animation: loading-spin 3s cubic-bezier(.79,.14,.15,.86) infinite;
+}
+
+@media screen and (max-width: 510px) {
+	header {
+		flex-direction: column;
+	}
+	
+}
+
+@media screen and (max-width: 1020px) {
+	#container {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* Safari */
+@-webkit-keyframes loading-spin {
+	0% { -webkit-transform: rotate(0deg); }
+	100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes loading-spin {
+	0% { transform: rotate(0deg); }
+	50% { transform: rotate(360deg); border-inline-color: #009688;}
+	100% { transform: rotate(1080deg); }
+}

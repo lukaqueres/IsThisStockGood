@@ -233,6 +233,7 @@ class Result:
 		self.sticker_price: Property = Property(None)
 		self.payback_time: Property = Property(None)
 		self.average_volume: Property = Property(None)
+		self.shares_to_hold: Property = Property(None)
 		
 		self.error: Optional[tuple[int, str]] = None
 	
@@ -257,7 +258,7 @@ class Result:
 		
 		for zero_based, zero_range in zero_based_range.items():
 			if getattr(self, zero_based) is not None:
-				getattr(self, zero_based).range_color(zero_range)
+				getattr(self, zero_based).zero_based_range_color(zero_range)
 		
 		if self.free_cash_flow.value is not None and self.free_cash_flow.value < 0:
 			self.debt_payoff_time.color = Color.red
@@ -267,16 +268,19 @@ class Result:
 		
 		if not self.payback_time.value:
 			self.payback_time.color = Color.grey
+			
+		if not self.average_volume.value:
+			self.average_volume.color = Color.grey
 		
-		if self.average_volume is not None and self.current_price.value is not None:
+		if self.average_volume.value is not None and self.current_price.value is not None:
 			average_volume = self.average_volume.value or 0
 			min_volume = 1000000 if self.current_price.value <= 1.0 else 500000
 			self.average_volume.color = Color.green if average_volume >= min_volume else Color.red
 		
-		whites = ["margin_of_safety_price", "sticker_price", "total_debt", "free_cash_flow"]
+		nones = ["margin_of_safety_price", "sticker_price", "total_debt", "free_cash_flow"]
 		
-		for item in whites:
-			getattr(self, item).color = Color.white
+		for item in nones:
+			getattr(self, item).color = None
 	
 	def to_json(self) -> str:
 		"""

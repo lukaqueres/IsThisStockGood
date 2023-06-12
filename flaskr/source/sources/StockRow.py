@@ -121,7 +121,7 @@ class StockRow(src.Source):
 			self.error = (self.response.status_code, self.response.reason)
 			return self
 		if not self.__parse():
-			self.error = (422, "Data could not be processed")
+			self.error = (424, "Data could not be processed")
 			return self
 		return self
 	

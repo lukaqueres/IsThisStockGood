@@ -19,7 +19,7 @@ logger = logging.getLogger("IsThisStockGood")
 
 logger.level = logging.ERROR
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='assets')
 
 
 @app.route("/<ticker>/preview.jpg")
@@ -35,12 +35,15 @@ def symbol_preview(ticker: str = None):
 	
 	ticker = ticker.upper()
 	
-	data, code = source.ticker(ticker)
-	if data["error"]:
-		img = preview.error(ticker, code, data["error"])
+	if source.check(ticker):
+		data, code = source.ticker(ticker)
+		if data["error"]:
+			img = preview.error(ticker, code, data["error"])
+		else:
+			img = preview.ticker(ticker, data)
 	else:
-		img = preview.ticker(ticker, data)
-	
+		img = preview.error(ticker, 400, "Invalid ticker",
+		                    "Provided ticker is invalid. \nPlease check and correct, then try again.")
 	return send_file(img, mimetype='image/jpeg')
 
 
@@ -52,7 +55,12 @@ def company_page(ticker: str = None):
 	@param ticker: Symbol
 	@return: Page with loading data
 	"""
-	return render_template('home.html', ticker=ticker.upper())
+	vals = {
+		"ticker": ticker.upper(),
+		"color_theme": flask.request.cookies.get('color-theme', None),
+		"current_year": date.today().year,
+	}
+	return render_template('home.html', **vals)
 
 
 @app.route("/")
@@ -65,11 +73,12 @@ def homepage():
 	if request.environ['HTTP_HOST'].endswith('.appspot.com'):  # Redirect the appspot url to the custom url
 		return flask.redirect("http://isthisstockgood.com", code=302)
 	
-	template_values = {
-		'page_title': "Is This Stock Good?",
+	vals = {
+		"ticker": None,
+		"color_theme": flask.request.cookies.get('color-theme', None),
 		'current_year': date.today().year,
 	}
-	return render_template('home.html', **template_values)
+	return render_template('home.html', **vals)
 
 
 @app.route("/search/<ticker>")
@@ -82,6 +91,9 @@ def search(ticker: str):
 	"""
 	if request.environ['HTTP_HOST'].endswith('.appspot.com'):  # Redirect the appspot url to the custom url
 		return flask.redirect(f"http://isthisstockgood.com/search/{ticker}", code=302)
+	
+	if not source.check(ticker):
+		return {"error": "Invalid ticker"}, 400
 	
 	ticker = ticker.upper()
 	data, code = source.ticker(ticker)

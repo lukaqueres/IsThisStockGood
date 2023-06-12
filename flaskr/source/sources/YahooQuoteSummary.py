@@ -262,7 +262,7 @@ class YahooQuoteSummary(src.Source):
 		self.data.roic_history = self.__roic_history()
 		
 		if not self.data.roic_history:
-			self.error = (417, "Could not parse roic history")
+			self.error = (424, "Could not parse roic history")
 			return self
 		try:
 			self.data.roic_average_1 = self.__roic_average(1)
@@ -270,7 +270,7 @@ class YahooQuoteSummary(src.Source):
 		except Exception as e:
 			logger.error(e)
 			logging.error(traceback.format_exc())
-			self.error = (417, "Could not parse roic average")
+			self.error = (424, "Could not parse roic average")
 			return self
 		
 		return self
