@@ -1,119 +1,3 @@
-class Value extends HTMLElement {
-    constructor() {
-        super();
-
-        this.attachShadow({ mode: "open" });
-
-        this.wrapper = document.createElement("div");
-        this.wrapper.setAttribute("id", "wrapper");
-
-        this.name = this.wrapper.appendChild(document.createElement("p"));
-        this.name.appendChild(document.createTextNode("name" in this.dataset ? this.dataset.name : ""));
-
-        let value = this.dataset.value ? this.dataset.value : "-"
-
-        this.value = this.wrapper.appendChild(document.createElement("p"));
-        this.value.setAttribute("id", "value");
-        this.value.appendChild(document.createTextNode(this.check_value(value)));
-
-        this.colorIndicator = this.wrapper.appendChild(document.createElement("div"));
-        this.colorIndicator.setAttribute("id", "color-indicator");
-
-        const style = document.createElement("style");
-        style.textContent = `
-            :host {
-                display: inline-block;
-                margin-inline: 1rem;
-                --background-secondary-color: #2e2c37;
-                --background-color: inherit;
-                --custom-value-color: transparent;
-            }
-
-            #wrapper {
-                display: flex;
-                justify-content: center;
-                flex-direction: column;
-                margin-left: 1rem;
-            }
-
-                #values-container {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                #wrapper > custom-value {
-                    background-color: var(--background-color);
-                }
-
-            #value {
-                border: 2px solid var(--background-secondary-color);
-                border-radius: 0.2rem;
-                padding: 1rem;
-                background-color: var(--background-color);
-                margin: 0;
-                z-index: 5;
-                position: relative;
-            }
-
-            #name {
-
-            }
-
-            #color-indicator {
-                background-color: var(--custom-value-color);
-                width: 3rem;
-                height: 3rem;
-                position: relative;
-                border-radius: 0.2rem;
-                transform: translate(-1rem, -2rem);
-                z-index: 1;
-            }
-        `;
-
-        this.shadowRoot.append(style, this.wrapper);
-
-    }
-
-    static get observedAttributes() { return ['data-name', 'data-color', 'data-value']; }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        switch (name) {
-            case "data-name":
-                this.name.innerText = this.dataset.name;
-                break;
-
-            case "data-color":
-                const sheet = new CSSStyleSheet();
-                sheet.replaceSync(`:host { --custom-value-color: ${this.dataset.color ? this.dataset.color : "transparent"};}`);
-                const elemStyleSheets = this.shadowRoot.adoptedStyleSheets;
-                this.shadowRoot.adoptedStyleSheets = [...elemStyleSheets, sheet];
-                //this.colorIndicator.style.backgroundColor = this.dataset.color ? this.dataset.color : "transparent";
-                break;
-
-            case "data-value":
-
-                let value = this.dataset.value ? this.dataset.value : "-"
-
-                this.value.innerText = this.check_value(value);
-                break;
-        }
-    }
-
-    check_value(value) {
-        if ( !isNaN(value) ) {
-            value = Number(value).toFixed(2);
-        } else if ( value == null || value == "null") {
-            value = "-";
-        }
-
-        return value;
-    }
-
-}
-
-customElements.define("custom-value", Value);
-
 class Notification extends HTMLElement {
     constructor() {
         super();
@@ -383,21 +267,6 @@ customElements.define("popup-notification", Notification);
 document.querySelector("#clear-notifications").addEventListener("click", Notification.remove_all);
 
 
-function getCookie(cname) {
-    return document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${cname}=`))
-    ?.split("=")[1];
-}
-
-function setCookie(cname, cvalue, cex = null) {
-    if ( cex === null ) {
-        document.cookie = cname + "=" + cvalue + ";path=/";
-    } else {
-        document.cookie = cname + "=" + cvalue + ";max-age=" + cex + ";SameSite=Lax;path=/";
-    }
-  }
-
 $(document).ready(function() {
 
     document.querySelector("#symbol-input").addEventListener("keydown", (event) => {     
@@ -413,21 +282,21 @@ $(document).ready(function() {
     const button_icon = document.querySelector("#scheme-cycler").querySelector("ion-icon");
 
     // let scheme = localStorage.getItem('color-theme');
-    let scheme = getCookie("color-theme");
+    let scheme = Cookie.get("color-theme");
 
     if( scheme === undefined || scheme === null ) {
         // localStorage.setItem('color-theme', "dark");
         setCookie("color-theme", "dark", "31536000");
     }
 
-    setCookie("color-theme", scheme, "31536000");
+    Cookie.set("color-theme", scheme, "31536000");
 
-    button_icon.setAttribute("name", schemes[scheme]);
+    button_icon.setAttribute("name", schemes[scheme] ? schemes[scheme] : "moon-outline");
 
     document.querySelector("#scheme-cycler").addEventListener("click", (event) => {    
 
         const button_icon = document.querySelector("#scheme-cycler").querySelector("ion-icon");
-        let next = order.indexOf(getCookie("color-theme")); // localStorage.getItem('color-theme');
+        let next = order.indexOf(Cookie.get("color-theme")); // localStorage.getItem('color-theme');
         
         if ( next + 1 >= order.length) {
             next = 0;
@@ -448,7 +317,7 @@ $(document).ready(function() {
         }
 
         // localStorage.setItem('color-theme', scheme);
-        setCookie("color-theme", scheme, "31536000");
+        Cookie.set("color-theme", scheme, "31536000");
 
         button_icon.setAttribute("name", schemes[scheme]);
     });
@@ -456,6 +325,7 @@ $(document).ready(function() {
     $(window).on('popstate',function(event) {
         const memory = event.originalEvent.state;
         if (Object.hasOwn(memory, 'data')) {
+            $("#symbol-input").value = memory.data.ticker;
             loadValues(memory.data);
         } else if (Object.hasOwn(memory, 'ticker')) {
             load(memory.ticker);
@@ -471,7 +341,7 @@ $(document).ready(function() {
 function loadValues(data) {
     for (const [key, value] of Object.entries(data)) {
         if ( Array.isArray(value) ) {
-            for (let i = 0; i < value.length; i++) {
+            for ( let i = 0; i < value.length; i++) { //
                 let element = document.querySelector(`#${key}-${i}`);
                 if ( !element ) {
                     continue;
@@ -483,8 +353,38 @@ function loadValues(data) {
         } else {
             let element = document.querySelector(`#${key}`);
             if ( element ) {
-                element.dataset.value = value["value"];
-                element.dataset.color = value["color"];
+                if (typeof value === 'string' || value instanceof String || value === null) {
+                    element.dataset.text = value;
+                } else {
+                    element.dataset.value = value["value"];
+                    element.dataset.color = value["color"];
+                }
+            } else {
+                if ( typeof data[key] === 'object' && data[key] != null ) {
+                    for (const [sec_key, sec_value] of Object.entries(data[key])) {
+                        element = document.querySelector(`#${key}-${sec_key}`);
+
+                        if ( element ) {
+                            if ( Array.isArray(sec_value) ) {
+                                let j = sec_value.length - 1;
+                                for (let i = 0; i < sec_value.length; i++) {
+                                    element = document.querySelector(`#${key}-${sec_key}-${i}`);
+                                    if ( !element ) {
+                                        continue;
+                                    }
+                                    let elem_value = sec_value[i];
+                                    element.dataset.value = elem_value["value"];
+                                    element.dataset.color = elem_value["color"];
+                                }
+                            } else if (typeof sec_value === 'string' || sec_value instanceof String || sec_value === null) {
+                                element.dataset.text = sec_value;
+                            } else {
+                                element.dataset.value = sec_value["value"];
+                                element.dataset.color = sec_value["color"];
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -494,7 +394,7 @@ function load(ticker) {
 
     $(document).ready(function() {
 
-        $("#symbol-input").value = ticker;
+        $("#symbol-input").val(ticker);
 
         $("#searchbox").submit(); 
 

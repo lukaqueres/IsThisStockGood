@@ -215,14 +215,15 @@ class Result:
 		self.ticker: Optional[str] = None
 		self.name: Optional[str] = None
 		self.shortName: Optional[str] = None
+		self.address: Optional[str] = None
 		self.industry: Optional[str] = None
 		self.profile: Optional[object] = None
 		
-		self.roic: list[Property] = []
-		self.equity: list[Property] = []
-		self.eps: list[Property] = []
-		self.sales: list[Property] = []
-		self.cash: list[Property] = []
+		self.roic: list[Property] = [Property(None) for p in range(4)]
+		self.equity: list[Property] = [Property(None) for p in range(4)]
+		self.eps: list[Property] = [Property(None) for p in range(4)]
+		self.sales: list[Property] = [Property(None) for p in range(4)]
+		self.cash: list[Property] = [Property(None) for p in range(4)]
 		
 		self.total_debt: Property = Property(None)
 		self.free_cash_flow: Property = Property(None)

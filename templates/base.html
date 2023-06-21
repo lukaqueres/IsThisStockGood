@@ -3,13 +3,20 @@
 <html {{"class={}".format(color_theme) if color_theme else "class=dark" }} lang="en">
 
 {% include "head.html" %}
-<script src="{{ url_for('static', filename='js/objects.js') }}"></script>
 
 <body>
-    {% block body %}
-    {% endblock %}
+    {% include "header.html" %}
+
+    {% include "notifications.html" %}
+    <div id="container">
+        {% include "sidebar.html" %}
+
+        {% block body %}
+        {% endblock %}
+    </div>
 
     <script src="{{ url_for('static', filename='js/functions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/objects.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     {% block footer %}
     {% include "footer.html" %}

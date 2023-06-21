@@ -71,7 +71,9 @@ def ticker(symbol: str) -> (dict, int):
 		yahoo_quote_summary.data.roic_average_3,
 		stock_row.data.roic_averages)
 	
-	result.profile = yahoo_quote_summary.data.profile
+	profile = yahoo_quote_summary.data.profile
+	result.address = f"{profile.country} {profile.city} - {profile.address1}"
+	result.profile = profile
 	result.industry = msn_money.data.industry if msn_money.data.industry else yahoo_quote_summary.data.profile.industryDisp
 	result.shortName = msn_money.data.shortName
 	result.name = msn_money.data.displayName
@@ -86,14 +88,16 @@ def ticker(symbol: str) -> (dict, int):
 		result.sales = [elements.Property(elem) for elem in stock_row.data.revenue_growth_rates]
 	if stock_row.data.equity_growth_rates is not None:
 		result.equity = [elements.Property(elem) for elem in stock_row.data.equity_growth_rates]
+		
 	if stock_row.data.free_cash_flow_growth_rates is not None:
 		result.cash = [elements.Property(elem) for elem in stock_row.data.free_cash_flow_growth_rates]
 	
-	result.roic.reverse()  # TODO: For some weird reason values are reversed, temporary fix
+	"""
+	result.roic.reverse()
 	result.eps.reverse()
 	result.sales.reverse()
 	result.equity.reverse()
-	result.cash.reverse()
+	result.cash.reverse()"""
 	
 	result.free_cash_flow.value = stock_row.data.recent_free_cash_flow
 	result.debt_payoff_time.value = stock_row.data.debt_payoff_time

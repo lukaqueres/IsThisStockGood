@@ -1,10 +1,28 @@
 String.prototype.format = function () {
-    var i = 0, args = arguments;
+  var i = 0, args = arguments;
     return this.replace(/{}/g, function () {
       return typeof args[i] != 'undefined' ? args[i++] : '';
     });
-  };
+};
   
+class Cookie {
+
+	static get(cname) {
+		return document.cookie
+		.split("; ")
+		.find((row) => row.startsWith(`${cname}=`))
+		?.split("=")[1];
+	}
+
+	static set(cname, cvalue, cex = null) {
+		if ( cex === null ) {
+			document.cookie = cname + "=" + cvalue + ";path=/";
+		} else {
+			document.cookie = cname + "=" + cvalue + ";max-age=" + cex + ";SameSite=Lax;path=/";
+		}
+	}
+
+}
 
 class Loading {
     static timeout = null
