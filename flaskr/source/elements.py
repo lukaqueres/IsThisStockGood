@@ -5,7 +5,7 @@ Classes for sourcing, and parsing results.
 
 from typing import Any, Optional, Tuple, Type
 
-import requests
+import aiohttp
 import random
 import logging
 import json
@@ -59,9 +59,9 @@ class Source:
 		self.symbol: str = symbol
 		self.error: Optional[Tuple[int, str]] = None
 		self.data: Type[Data] | Data = Data()
-		self.response: Optional[requests.Response] = None
+		self.response: Optional[aiohttp.ClientResponse] = None
 
-	async def _get(self, url: str, *args, **kwargs) -> requests.Response:
+	async def _get(self, url: str, *args, **kwargs) -> aiohttp.ClientResponse:
 		"""
 		Asynchronous method for get calls with user agent in session
 
@@ -75,16 +75,15 @@ class Source:
 		@return: response from url
 		"""
 		
-		session = requests.Session()
-		session.headers.update({
+		async with aiohttp.ClientSession(headers={
 			'User-Agent': random.choice(self._USER_AGENTS)
-		})
-		response = session.get(*args, url=url, **kwargs)
-		if not response.ok:
-			logger.warning(f"{response.url} returned code {response.status_code} : {response.reason}")
-			return response
-		logger.debug(f"{response.url} returned: {response.content}")
-		return response
+		}) as session:
+			async with session.get(*args, url=url, **kwargs) as response:
+				if not response.ok:
+					logger.warning(f"{response.url} returned code {response.status} : {response.reason}")
+					return response
+				logger.debug(f"{response.url} returned: {response.content}")
+				return response
 
 
 class Color:

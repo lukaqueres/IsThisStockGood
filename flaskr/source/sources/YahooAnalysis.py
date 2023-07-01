@@ -63,10 +63,10 @@ class YahooAnalysis(src.Source):
 		"""
 		self.response = await self._get(YahooAnalysis.__url.format(ticker=self.symbol))
 		if not self.response.ok:
-			self.error = (self.response.status_code, self.response.reason)
+			self.error = (self.response.status, self.response.reason)
 			return self
 		
-		text = self.response.text
+		text = await self.response.text()
 		self.data.five_year_growth_rate = self.__parse_five_year_growth_rate(text)
 		if not self.data.five_year_growth_rate:
 			self.error = (404, "Could not parse five year growth rate")

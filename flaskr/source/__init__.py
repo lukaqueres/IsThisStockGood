@@ -27,6 +27,7 @@ async def ticker(symbol: str) -> (dict, int):
 	@return: dictionary with data, and code for http response
 	"""
 	msn_money = await MSNMoney.setup(symbol)
+	"""
 	msn_money = await msn_money.fetch()
 	stock_row = await StockRow(symbol).fetch()
 	yahoo_analysis = await YahooAnalysis(symbol).fetch()
@@ -36,6 +37,16 @@ async def ticker(symbol: str) -> (dict, int):
 	                                               "balanceSheetHistory", "earnings",
 	                                               "defaultKeyStatistics"]
 	                                              ).fetch()
+	"""
+	msn_money, stock_row, yahoo_analysis, yahoo_quote_summary = await asyncio.gather(
+		msn_money.fetch(), StockRow(symbol).fetch(), YahooAnalysis(symbol).fetch(),
+		YahooQuoteSummary(symbol,
+		                  ["assetProfile", "incomeStatementHistory",
+		                   "balanceSheetHistory", "financialData",
+		                   "balanceSheetHistory", "earnings",
+		                   "defaultKeyStatistics"]
+		                  ).fetch()
+	)
 	
 	result = elements.Result()
 	result.ticker = symbol
@@ -107,20 +118,19 @@ async def ticker(symbol: str) -> (dict, int):
 	return json.loads(result.to_json()), code
 
 
-async def favourites(symbols: list) -> list[dict]:
-	result: list[dict] = []
+async def favourites(symbols: list) -> dict[str, dict]:
+	result: dict[str, dict] = {}
 	tasks: list = []
 	for symbol in symbols:
 		if not check(symbol):
-			result.append({"error": "Invalid ticker"})
+			result.update({symbol: {"error": "Invalid ticker"}})
 			continue
 		symbol = symbol.upper()
 		tasks.append(ticker(symbol))
 		# data, code = await ticker(symbol)
-	loop = asyncio.get_event_loop()
-	results = loop.run_until_complete(asyncio.gather(*tasks))
+	results = await asyncio.gather(*[ticker(s) for s in symbols if s not in result.keys()])
 	for r in results:
-		result.append(r[0])
+		result.update({r[0]["ticker"]: r[0]})
 	return result
 
 

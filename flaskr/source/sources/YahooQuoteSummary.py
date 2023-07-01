@@ -234,7 +234,8 @@ class YahooQuoteSummary(src.Source):
 		"""
 		if not self.response:
 			return None
-		return self.response.json()["quoteSummary"]["result"][0]
+		result = await self.response.json()
+		return result["quoteSummary"]["result"][0]
 	
 	async def fetch(self) -> YahooQuoteSummary:
 		"""
@@ -245,7 +246,7 @@ class YahooQuoteSummary(src.Source):
 		self.response = await self._get(self.__url.format(ticker=self.symbol, modules=self.modules))
 		
 		if not self.response.ok:
-			self.error = (self.response.status_code, self.response.reason)
+			self.error = (self.response.status, self.response.reason)
 			return self
 		
 		self.data.profile.fill(["address1", "city", "state", "country", "website", "industryDisp",
