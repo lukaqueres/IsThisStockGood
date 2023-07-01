@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div id="favourites-container">
+    <div>
+        <form is="favourite-form" action="/favourites"><input type="text" name="favourite_ticker" aria-label="Add favourite ticker" id="favourite-ticker-added">
+        <button type="submit"><ion-icon aria-hidden="true" name="add-outline"></ion-icon></button></form>
+    </div>
+    {% for i in favourite_tickers %}
+        <favourite-ticker-display data-ticker="{{ i }}"></favourite-ticker-display>
+    {% else %}
+    <div>No Favourites found. You can add using input above.</div>
+    {% endfor %}
+</div>
+
+{% endblock body %}
+
+{% block footer %}
+    {{ super() }}
+{% endblock footer %}

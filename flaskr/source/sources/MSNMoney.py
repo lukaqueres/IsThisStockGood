@@ -87,7 +87,16 @@ class MSNMoney(src.Source):
 		"""
 		super().__init__(symbol)
 		self.data = Data()
-		self.__id: Optional[str] = asyncio.run(self.__stock_id())
+		self.__id: Optional[str] = None
+		
+	@classmethod
+	async def setup(cls, symbol):
+		self = MSNMoney(symbol)
+		self.__id = await self.__stock_id()
+		return self
+		
+	async def set_id(self):
+		self.__id = await self.__stock_id()
 		
 	async def fetch(self) -> MSNMoney:
 		"""

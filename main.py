@@ -3,7 +3,8 @@ This is backend flask app for page
 
 """
 import logging
-
+import json
+import asyncio
 
 import flaskr.source as source
 
@@ -81,6 +82,32 @@ def homepage():
 	return render_template('home.html', **vals)
 
 
+@app.route("/favourites")
+def favourites():
+	favs: list = json.loads(flask.request.cookies.get('favourite-tickers', "[]"))
+	result: list[dict] = asyncio.run(source.favourites(favs))
+
+	return result
+
+
+@app.route("/me/favourites")
+def favourite():
+	"""
+	Page with favourite tickers and their details
+
+	@return: Main page
+	"""
+	if request.environ['HTTP_HOST'].endswith('.appspot.com'):  # Redirect the appspot url to the custom url
+		return flask.redirect("http://isthisstockgood.com/favourites", code=302)
+	
+	vals = {
+		"color_theme": flask.request.cookies.get('color-theme', None),
+		"favourite_tickers": json.loads(flask.request.cookies.get('favourite-tickers', "[]")),
+		'current_year': date.today().year,
+	}
+	return render_template('favourites.html', **vals)
+
+
 @app.route("/search/<ticker>")
 def search(ticker: str):
 	"""
@@ -96,7 +123,7 @@ def search(ticker: str):
 		return {"error": "Invalid ticker"}, 400
 	
 	ticker = ticker.upper()
-	data, code = source.ticker(ticker)
+	data, code = asyncio.run(source.ticker(ticker))
 	
 	return data, code
 

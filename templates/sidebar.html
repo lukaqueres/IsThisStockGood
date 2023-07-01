@@ -1,3 +1,28 @@
-<div id="sidebar">
-    <button class="sidebar-category-expand"><ion-icon name="star"></ion-icon>Favourites</button>
-</div>
+<side-bar id="sidebar" data-expand="true">
+    <form id="searchbox" is="search-form" name="searchbox" action="/search/{}" method="post">
+        <button
+            id="sumbit-ticker"
+            type="submit"
+            class="ionic"
+            aria-label="Submit ticker"
+            title="Analyze"><ion-icon name="search-outline" aria-hidden="true"></ion-icon></button>
+        <input
+            class="sidebar-overflow"
+            type="text"
+            value="{{ ticker if ticker }}"
+            name="symbol-input"
+            id="symbol-input"
+            placeholder="Ticker Symbol"
+            title="Insert ticker Symbol"
+            aria-label="Insert ticker Symbol"
+            maxlength=6/>
+    </form>
+    <!--
+    <button class="sidebar-button sidebar-category"><ion-icon name="time-outline" aria-hidden="true"></ion-icon><span class="sidebar-label sidebar-overflow">Recent</span></button>
+    <div class="sidebar-category-content">
+        {% for i in recent_tickers %}
+            <a href="/{{ i }}">{{ i }}</a>
+        {% endfor %}
+    </div>-->
+    <a href="/me/favourites" class="sidebar-button"><ion-icon name="star" aria-hidden="true"></ion-icon><span class="sidebar-label sidebar-overflow">Favourites</span></a>
+</side-bar>

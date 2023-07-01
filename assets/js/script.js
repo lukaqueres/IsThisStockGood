@@ -286,7 +286,7 @@ $(document).ready(function() {
 
     if( scheme === undefined || scheme === null ) {
         // localStorage.setItem('color-theme', "dark");
-        setCookie("color-theme", "dark", "31536000");
+        Cookie.set("color-theme", "dark", "31536000");
     }
 
     Cookie.set("color-theme", scheme, "31536000");

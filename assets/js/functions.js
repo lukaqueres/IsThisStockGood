@@ -50,7 +50,7 @@ class Loading {
         submit_ticker.disabled = false;
 
         const submit_ticker_icon = submit_ticker.querySelector("ion-icon");
-        submit_ticker_icon.setAttribute("name", "arrow-forward-outline");
+        submit_ticker_icon.setAttribute("name", "search-outline");
         submit_ticker_icon.classList.remove("load");
 
         const symbol_input = document.querySelector("#symbol-input");

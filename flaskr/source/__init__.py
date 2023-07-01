@@ -4,8 +4,8 @@ Get data from every source with one call
 @see ticker: This function returns data
 """
 import logging
-import asyncio
 import json
+import asyncio
 import re
 from typing import Optional
 
@@ -16,7 +16,7 @@ import flaskr.source.RuleOneCalcs as RuleOne
 logger = logging.getLogger("IsThisStockGood")
 
 
-def ticker(symbol: str) -> (dict, int):
+async def ticker(symbol: str) -> (dict, int):
 	"""
 	Fetch data for company with provided ticker / symbol
 	
@@ -26,15 +26,16 @@ def ticker(symbol: str) -> (dict, int):
 	
 	@return: dictionary with data, and code for http response
 	"""
-	msn_money = asyncio.run(MSNMoney(symbol).fetch())
-	stock_row = asyncio.run(StockRow(symbol).fetch())
-	yahoo_analysis = asyncio.run(YahooAnalysis(symbol).fetch())
-	yahoo_quote_summary = asyncio.run(YahooQuoteSummary(symbol,
-	                                                    ["assetProfile", "incomeStatementHistory",
-	                                                     "balanceSheetHistory", "financialData",
-	                                                     "balanceSheetHistory", "earnings",
-	                                                     "defaultKeyStatistics"]
-	                                                    ).fetch())
+	msn_money = await MSNMoney.setup(symbol)
+	msn_money = await msn_money.fetch()
+	stock_row = await StockRow(symbol).fetch()
+	yahoo_analysis = await YahooAnalysis(symbol).fetch()
+	yahoo_quote_summary = await YahooQuoteSummary(symbol,
+	                                              ["assetProfile", "incomeStatementHistory",
+	                                               "balanceSheetHistory", "financialData",
+	                                               "balanceSheetHistory", "earnings",
+	                                               "defaultKeyStatistics"]
+	                                              ).fetch()
 	
 	result = elements.Result()
 	result.ticker = symbol
@@ -92,13 +93,6 @@ def ticker(symbol: str) -> (dict, int):
 	if stock_row.data.free_cash_flow_growth_rates is not None:
 		result.cash = [elements.Property(elem) for elem in stock_row.data.free_cash_flow_growth_rates]
 	
-	"""
-	result.roic.reverse()
-	result.eps.reverse()
-	result.sales.reverse()
-	result.equity.reverse()
-	result.cash.reverse()"""
-	
 	result.free_cash_flow.value = stock_row.data.recent_free_cash_flow
 	result.debt_payoff_time.value = stock_row.data.debt_payoff_time
 	result.debt_equity_ratio.value = stock_row.data.debt_equity_ratio
@@ -111,6 +105,23 @@ def ticker(symbol: str) -> (dict, int):
 	result.colour()
 	
 	return json.loads(result.to_json()), code
+
+
+async def favourites(symbols: list) -> list[dict]:
+	result: list[dict] = []
+	tasks: list = []
+	for symbol in symbols:
+		if not check(symbol):
+			result.append({"error": "Invalid ticker"})
+			continue
+		symbol = symbol.upper()
+		tasks.append(ticker(symbol))
+		# data, code = await ticker(symbol)
+	loop = asyncio.get_event_loop()
+	results = loop.run_until_complete(asyncio.gather(*tasks))
+	for r in results:
+		result.append(r[0])
+	return result
 
 
 def check(symbol: str) -> bool:
