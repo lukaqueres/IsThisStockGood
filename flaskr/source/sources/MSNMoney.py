@@ -96,7 +96,7 @@ class MSNMoney(src.Source):
 		return self
 		
 	async def set_id(self):
-		self.__id = await self.__stock_id()
+		self.__id: Optional[str] = await self.__stock_id()
 		
 	async def fetch(self) -> MSNMoney:
 		"""
@@ -112,12 +112,12 @@ class MSNMoney(src.Source):
 			self.response = None
 			return self
 		if not self.response.ok:
-			self.error = (self.response.status_code, self.response.reason)
+			self.error = (self.response.status, self.response.reason)
 			return self
-		self.data.pe_low, self.data.pe_high = self.__pe_ratios()
+		self.data.pe_low, self.data.pe_high = await self.__pe_ratios()
 		
 		try:
-			data = self.response.json()
+			data = await self.response.json()
 			
 			self.data.displayName = data.get("displayName", None)
 			self.data.industry = data.get("industry", None)
@@ -139,9 +139,9 @@ class MSNMoney(src.Source):
 		"""
 		response = await self._get(MSNMoney.url_id.format(ticker=self.symbol))
 		if not response.ok:
-			self.error = (response.status_code, response.reason)
+			self.error = (response.status, response.reason)
 			return None
-		content = response.text
+		content = await response.text()
 		try:
 			content = json.loads(content)
 			for data in content.get('data', {}).get('stocks', []):
@@ -154,15 +154,16 @@ class MSNMoney(src.Source):
 			self.error = (424, "Data could not be processed")
 			return None
 		
-	def __pe_ratios(self) -> Tuple[Optional[int], Optional[int]]:
+	async def __pe_ratios(self) -> Tuple[Optional[int], Optional[int]]:
 		"""
 		Returns lowest, and highest price-to-earnings ratio, None if there was some problem ( or no data )
 
 		@return: lowest pe-ratios, highest pe-ratios
 		"""
+		json_result = await self.response.json()
 		recent_pe_ratios = [
 			                   year.get('priceToEarningsRatio', None)
-			                   for year in self.response.json().get('companyMetrics', [])
+			                   for year in json_result.get('companyMetrics', [])
 			                   if year.get('fiscalPeriodType', '') == 'Annual' and 'priceToEarningsRatio' in year
 		][-self.__KEY_RATIOS_YEAR_SPAN:]
 		if len(recent_pe_ratios) != self.__KEY_RATIOS_YEAR_SPAN:

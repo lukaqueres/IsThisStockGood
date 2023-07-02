@@ -10,6 +10,7 @@ Get values from Yahoo Quote Summary, like profile and other data
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any, List, Optional
 import logging
 import traceback
@@ -226,7 +227,7 @@ class YahooQuoteSummary(src.Source):
 		self.data: Data = Data()
 	
 	@property
-	def values(self) -> Any:
+	async def values(self) -> Any:
 		"""
 		Allows for easier access to response values
 		
@@ -249,18 +250,19 @@ class YahooQuoteSummary(src.Source):
 			self.error = (self.response.status, self.response.reason)
 			return self
 		
+		values = await self.values
 		self.data.profile.fill(["address1", "city", "state", "country", "website", "industryDisp",
 		                        "sector", "longBusinessSummary", "fullTimeEmployees", "companyOfficers"],
-		                       self.values["assetProfile"])
+		                       values["assetProfile"])
 	
-		financial_data = self.values.get("financialData", {})
+		financial_data = values.get("financialData", {})
 		self.data.currentPrice = financial_data.get("currentPrice", {}).get("raw", None)
 		self.data.totalDebt = financial_data.get("totalDebt", {}).get("raw", None)
 		self.data.debtToEquity = financial_data.get("debtToEquity", {}).get("raw", None)
 		
-		self.data.trailingEps = self.values.get("defaultKeyStatistics", {}).get("trailingEps", {}).get("raw", None)
+		self.data.trailingEps = values.get("defaultKeyStatistics", {}).get("trailingEps", {}).get("raw", None)
 		
-		self.data.roic_history = self.__roic_history()
+		self.data.roic_history = await self.__roic_history()
 		
 		if not self.data.roic_history:
 			self.error = (424, "Could not parse roic history")
@@ -276,16 +278,16 @@ class YahooQuoteSummary(src.Source):
 		
 		return self
 		
-	def __roic_history(self) -> list:
+	async def __roic_history(self) -> list:
 		"""
 		Calculates roic history
 		
 		@return: roic history list
 		"""
-		net_income_history = self.__income_statement_history('netIncome')
-		cash_history = self.__balance_sheet_history('cash')
-		long_term_debt_history = self.__balance_sheet_history('longTermDebt')
-		stockholder_equity_history = self.__balance_sheet_history('totalStockholderEquity')
+		net_income_history = await self.__income_statement_history('netIncome')
+		cash_history = await self.__balance_sheet_history('cash')
+		long_term_debt_history = await self.__balance_sheet_history('longTermDebt')
+		stockholder_equity_history = await self.__balance_sheet_history('totalStockholderEquity')
 		roic_history = []
 		for i in range(0, len(net_income_history)):
 			roic_history.append(
@@ -316,7 +318,7 @@ class YahooQuoteSummary(src.Source):
 			raise AttributeError("Too few years in ROIC history")
 		return round(sum(history[0:years]) / years, 2)
 	
-	def __income_statement_history(self, key: str) -> list:
+	async def __income_statement_history(self, key: str) -> list:
 		"""
 		Returns company income statement history
 
@@ -324,11 +326,12 @@ class YahooQuoteSummary(src.Source):
 		@return: Income statement history
 		"""
 		history = []
-		for stmt in self.values.get('incomeStatementHistory', {}).get('incomeStatementHistory', []):
+		values = await self.values
+		for stmt in values.get('incomeStatementHistory', {}).get('incomeStatementHistory', []):
 			history.append(stmt.get(key).get('raw'))
 		return history
 	
-	def __balance_sheet_history(self, key: str) -> list:
+	async def __balance_sheet_history(self, key: str) -> list:
 		"""
 		Returns company balance sheet history
 		
@@ -336,6 +339,7 @@ class YahooQuoteSummary(src.Source):
 		@return: Balance sheet history
 		"""
 		history = []
-		for stmt in self.values.get('balanceSheetHistory', {}).get('balanceSheetStatements', []):
+		values = await self.values
+		for stmt in values.get('balanceSheetHistory', {}).get('balanceSheetStatements', []):
 			history.append(stmt.get(key, {}).get('raw'))
 		return history

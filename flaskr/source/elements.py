@@ -2,7 +2,7 @@
 Classes for sourcing, and parsing results.
 
 """
-
+import asyncio
 from typing import Any, Optional, Tuple, Type
 
 import aiohttp
@@ -82,7 +82,9 @@ class Source:
 				if not response.ok:
 					logger.warning(f"{response.url} returned code {response.status} : {response.reason}")
 					return response
+				
 				logger.debug(f"{response.url} returned: {response.content}")
+				await response.read()
 				return response
 
 

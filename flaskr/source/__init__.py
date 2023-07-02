@@ -120,17 +120,16 @@ async def ticker(symbol: str) -> (dict, int):
 
 async def favourites(symbols: list) -> dict[str, dict]:
 	result: dict[str, dict] = {}
-	tasks: list = []
+	
 	for symbol in symbols:
 		if not check(symbol):
 			result.update({symbol: {"error": "Invalid ticker"}})
 			continue
-		symbol = symbol.upper()
-		tasks.append(ticker(symbol))
 		# data, code = await ticker(symbol)
-	results = await asyncio.gather(*[ticker(s) for s in symbols if s not in result.keys()])
+	results = await asyncio.gather(*[ticker(s.upper()) for s in symbols if s not in result.keys()])
 	for r in results:
 		result.update({r[0]["ticker"]: r[0]})
+	result = {s: result[s] for s in symbols}
 	return result
 
 

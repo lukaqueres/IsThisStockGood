@@ -84,9 +84,12 @@ def homepage():
 
 @app.route("/favourites")
 def favourites():
+	loop = asyncio.new_event_loop()
 	favs: list = json.loads(flask.request.cookies.get('favourite-tickers', "[]"))
-	result: list[dict] = asyncio.run(source.favourites(favs))
-
+	result: dict[str, dict] = loop.run_until_complete(source.favourites(favs))
+	
+	loop.run_until_complete(asyncio.sleep(0))
+	loop.close()
 	return result
 
 
@@ -122,9 +125,12 @@ def search(ticker: str):
 	if not source.check(ticker):
 		return {"error": "Invalid ticker"}, 400
 	
+	loop = asyncio.new_event_loop()
 	ticker = ticker.upper()
-	data, code = asyncio.run(source.ticker(ticker))
+	data, code = loop.run_until_complete(source.ticker(ticker))
 	
+	loop.run_until_complete(asyncio.sleep(0))
+	loop.close()
 	return data, code
 
 

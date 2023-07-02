@@ -118,9 +118,9 @@ class StockRow(src.Source):
 		
 		self.response = await self._get(self.__url.format(ticker=self.symbol))
 		if not self.response.ok:
-			self.error = (self.response.status_code, self.response.reason)
+			self.error = (self.response.status, self.response.reason)
 			return self
-		if not self.__parse():
+		if not await self.__parse():
 			self.error = (424, "Data could not be processed")
 			return self
 		return self
@@ -140,7 +140,7 @@ class StockRow(src.Source):
 		}
 		return mapping.get(symbol.upper(), symbol)
 	
-	def __parse(self) -> bool:
+	async def __parse(self) -> bool:
 		"""
 		Parses data from result.
 		
@@ -148,7 +148,7 @@ class StockRow(src.Source):
 		"""
 		try:
 			data_dict = {}
-			data = self.response.json()
+			data = await self.response.json()
 			
 			rows = data.get("fundamentals", {}).get("rows", [])
 			_add_list_of_dicts_to_dict(rows, data_dict, "label")
